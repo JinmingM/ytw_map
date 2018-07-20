@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+ <style type="text/css">
+ body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+ </style>
+ <!--调用百度api -->
+ <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=zkbRSzjGckkGXwuIr9aMmDoztG8ajGAZ"></script>
+ <title>地图展示</title>
+</head>
+<body>
+ <div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+ // 百度地图API功能
+ var map = new BMap.Map("allmap"); // 创建Map实例
+ map.centerAndZoom("西安", 5);  // 初始化地图,用城市名设置地图中心点
+ map.addControl(new BMap.MapTypeControl()); //添加地图类型控件
+ map.setCurrentCity("深圳");   // 设置地图显示的城市 此项是必须设置的
+ map.enableScrollWheelZoom(true);  //开启鼠标滚轮缩放
+ var point = new BMap.Point(116.404, 39.915);
+ 
+ var myGeo = new BMap.Geocoder();
+ //批量解析
+ /*
+ var adds = ["长沙", "深圳", "香港", "郑州 ", "惠州", "南昌", "赣州", "中山", "阳江", "上海", "无锡", "南京"];
+ for (var i = 0; i < adds.length; i++) {
+  myGeo.getPoint(adds[i], function (point) {
+   if (point) {
+    var address = new BMap.Point(point.lng, point.lat);
+    var marker = new BMap.Marker(address);
+    map.addOverlay(marker);
+    var opts = {
+     width: 120,  // 信息窗口宽度
+     height: 70,  // 信息窗口高度
+     title: "项目信息" // 信息窗口标题
+    }
+    var infoWindow = new BMap.InfoWindow("<a href='#' target='blank'>查看详情</a>", opts); // 创建信息窗口对象
+    marker.addEventListener("click", function () {
+     map.openInfoWindow(infoWindow,address); //开启信息窗口
+    });
+   }
+  }, "深圳市");
+ }
+ */
+   var test = [
+  {"pr":"安徽省 ","num":24 },
+{"pr":"福建省 ","num":4 },
+{"pr":"甘肃省 ","num":18 },
+{"pr":"广东省 ","num":7 },
+{"pr":"广西壮族自治区 ","num":8 },
+{"pr":"贵州省 ","num":6 },
+{"pr":"海南省 ","num":2 },
+{"pr":"河北省 ","num":8 },
+{"pr":"河南省 ","num":27 },
+{"pr":"黑龙江省 ","num":7 },
+{"pr":"湖北省 ","num":22 },
+{"pr":"湖南省 ","num":7 },
+{"pr":"吉林省 ","num":5 },
+{"pr":"江苏省 ","num":6 },
+{"pr":"江西省 ","num":10 },
+{"pr":"辽宁省 ","num":3 },
+{"pr":"内蒙古自治区 ","num":5 },
+{"pr":"宁夏回族自治区 ","num":2 },
+{"pr":"青海省 ","num":1 },
+{"pr":"山东省 ","num":20 },
+{"pr":"山西省 ","num":12 },
+{"pr":"陕西省 ","num":10 },
+{"pr":"四川省 ","num":21 },
+{"pr":"西藏自治区 ","num":1 },
+{"pr":"新疆维吾尔自治区 ","num":5 },
+{"pr":"云南省 ","num":12 },
+{"pr":"浙江省 ","num":7 },
+{"pr":"重庆市 ","num":6},
+  ];
+  var max = 0;
+  var min = 1000;
+  for(var i=0, Lens = test.length; i<Lens; i++) {
+    console.log(typeof(test[i].num));
+    if(max<test[i].num)
+      max = test[i].num;
+    if(min>test[i].num)
+      min = test[i].num;
+  }
+  //console.log(max);
+  //console.log(min);
+  //console.log(max-min);
+  var gap = (max-min)/9;
+  console.log(gap);
+  for(var i=0, Lens = test.length; i<Lens; i++) {
+    console.log(Math.round((test[i].num - min)/gap));
+    getBoundary(test[i].pr,Math.round((test[i].num - min)/gap));
+  }
+  //getBoundary("新疆维吾尔自治区",5);
+  var buckets = 9;        // 一共9种颜色级别
+  var colors = ["#FFCC00","#FFB300","#FF9900","#FF8000","#FF6600","#FF4D00","#FF3300","#FF1A00","#FF0000"];
+  function getBoundary(sRegion,level) {
+
+    var bdary = new BMap.Boundary();
+    bdary.get(sRegion, function (rs) { //获取行政区域
+     var count = rs.boundaries.length; //行政区域的点有多少个
+     for (var i = 0; i < count; i++) {
+      var ply = new BMap.Polygon(rs.boundaries[i], { strokeWeight: 1, strokeColor: "#4A7300", fillColor: colors[level] }); //建立多边形覆盖物
+      map.addOverlay(ply); //添加覆盖物
+     }
+    });
+  }
+  function getlevel(data){
+
+  }
+</script>

@@ -1,0 +1,180 @@
+.legend {
+    position:absolute;
+    left:600px;
+    top:550px;
+    background:url(color.png);
+    opacity: 0.7;
+    width:126px; 
+    height:20px; 
+    z-index:999
+}
+.list {
+    position:absolute;
+    width:400px;
+    top: 60px;
+    left:30px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    background-color: rgba(0,0,0,0.35);
+    text-align: center;
+    z-index:999
+}
+
+.list-topbar{
+    position: relative;
+    margin-bottom: 16px;
+}
+.list-topbar a{
+    display: inline-block;
+    width: 50%;
+    line-height: 14px;
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.75);
+    text-align: center;
+    cursor: pointer;
+}
+.list-topbar a.active{
+    color: #007EFF;
+}
+.list-topbar .horizontal-bar{
+    position: absolute;
+    width: 40%;
+    height: 2px;
+    background-color: #007EFF;
+    border-radius: 2px;
+    left: 0;
+    top: 22px;
+}
+
+.list .no-data{
+    font-size: 11px;
+    margin: 30px 0 10px;
+    color: rgba(255,255,255,0.5);
+}
+
+/* list table */
+.list-table{
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.list-table td,
+.list-table th{
+    font-size: 16px;
+    line-height: 36px;
+    height: 36px;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.list-table th.province{
+    font-size: 18px;
+    color:#ffffff;
+    width: 30%;
+}
+
+.list-table td.province,
+.list-table th.station-num {
+    font-size: 18px;
+    color:#ffffff;
+    position: relative;
+}
+
+.list-table th.proportion{
+    font-size: 18px;
+    color:#ffffff;
+    position: relative;
+}
+.list-table th .sep{
+    position: absolute;
+    width: 1px;
+    height: 11px;
+    right: 0;
+    border-right: 1px solid rgba(255,255,255, 0.5);
+    top: 12px;
+}
+
+.list-table tr{
+    border-top: 1px solid rgba(255,255,255, 0.2);
+}
+.list-table thead tr{
+    border-top: none;
+}
+.list-table .tr0{
+    border-top: 2px solid rgba(255,255,255, 0.35);
+}
+
+.list-table tr .province{
+    color: #FFFFFF;
+}
+
+.list-table tr .station-num{
+    color: #FFFFFF;
+}
+
+.list-table td.index{
+    text-align: right;
+}
+.list-table td.index span{
+    display:inline-block;
+    width: 12px;
+    height: 12px;
+    line-height: 12px;
+    background-color: #007EFF;
+    vertical-align: middle;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.list-table .proportion{
+
+    color: #36BAFF;
+}
+.list-table span.txt{
+    position: absolute;
+    left: 0;
+    height: 7px;
+    width: 100%;
+    font-size: 16px;
+    line-height: 0px;
+}
+.list-table span.box{
+    display: inline-block;
+    width: 10px;
+    max-height: 90%;
+    position: relative;
+    bottom: -10px;
+    margin-left: -5px;
+}
+
+.list-table td.proportion .box{
+    background-color: #36BAFF;
+}
+
+
+@media all and (min-width: 370px) {
+    .title{
+        width: 257px;
+        height: 95px;
+        display: none;
+    }
+    .logo {
+        width: 98px;
+        height: 21px;
+        margin-bottom: 3px;
+    }
+}
+
+@media all and (min-width: 400px) {
+    .title{
+        width: 279px;
+        height: 103px;
+        display: none;
+    }
+    .logo {
+        width: 106px;
+        height: 23px;
+        margin-bottom: 4px;
+    }
+}

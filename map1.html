@@ -1,547 +1,344 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-        <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=xXGKcqwttNvBGfcEXTF2vrmXiHkMLGmW"></script>
-        <script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
-        <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-        <title>热力图</title>
-        <style type="text/css">
-        ul,li{list-style: none;margin:0;padding:0;float:left;}
-        html{height:100%}
-        body{height:100%;margin:0px;padding:0px;font-family:"微软雅黑";}
-        #container{height:100%;width:100%;}
-        #r-result{width:100%;}
-        </style>
-    </head>
-    <body>
+    <meta charset="UTF-8"/>
+    <title>Map</title>
+    <script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0"></script>
+    <script type="text/javascript" src="data1.js"></script>
+   
+    <style type="text/css">body,html{width:100%;height:100%;margin:0;font-family:"Microsoft YaHei"}#mapDiv{width:100%;height:400px}input,b,p{margin-left:5px;font-size:14px}</style>
+    <script>
+        var map;
+        var zoom = 4;
+        var colors=["#FFFF24","#FFE210","#FFC100","#FF9F00","#FF7D08","#FF6900","#FF5702"];
+        var arr = new Array();
+        var arr1 = new Array();
+        var arr_points = new Array();
+        var arr_names = new Array();
+        var overlay_exist=1;
+        nowcolor = "#FFFF24";
+        nowindex = 0;
+        nowlevel = 1;//1->全国  2->省份 3->市级
+        timeoutID= null;//消除双击=2*单击
+        dblclick_flag=0;
+        function onLoad() {
+            map = new T.Map('mapDiv',{minZoom:4,maxZoom:10}); 
+            map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+            geocode = new T.Geocoder();
+            map.disableDoubleClickZoom();
+            
 
-       <div id="container">
-       </div>
-       <div id="r-result">
-        <!--style="display  -->
-        <input type="button"  onclick="openHeatmap();" value="显示热力图"/>
-        <input type="button"  onclick="closeHeatmap();" value="关闭热力图"/>
-        <input type="button"  onclick="openMark();" value="显示标记"/>
-        <input type="button"  onclick="closeMark();" value="关闭标记"/>
+            map.addEventListener("zoomstart",function(e){
+                
+                
+            });
+            map.addEventListener("zoomend",function(e){
+                //console.log("zoomend");
 
-    </div>
-
-</body>
-</html>
-<script type="text/javascript">
-    var map = new BMap.Map("container",{minZoom:5,maxZoom:16});          // 创建地图实例
-
-    var point = new BMap.Point(115.795389,33.854);
-    var markers = new Array();
-    var provinces = new Array();
-    var provinces_num = new Array();
-    var test = [
-      {"pr":"安徽省 ","num":24 },
-    {"pr":"福建省 ","num":4 },
-    {"pr":"甘肃省 ","num":18 },
-    {"pr":"广东省 ","num":7 },
-    {"pr":"广西壮族自治区 ","num":8 },
-    {"pr":"贵州省 ","num":6 },
-    {"pr":"海南省 ","num":2 },
-    {"pr":"河北省 ","num":8 },
-    {"pr":"河南省 ","num":27 },
-    {"pr":"黑龙江省 ","num":7 },
-    {"pr":"湖北省 ","num":22 },
-    {"pr":"湖南省 ","num":7 },
-    {"pr":"吉林省 ","num":5 },
-    {"pr":"江苏省 ","num":6 },
-    {"pr":"江西省 ","num":10 },
-    {"pr":"辽宁省 ","num":3 },
-    {"pr":"内蒙古自治区 ","num":5 },
-    {"pr":"宁夏回族自治区 ","num":2 },
-    {"pr":"青海省 ","num":1 },
-    {"pr":"山东省 ","num":20 },
-    {"pr":"山西省 ","num":12 },
-    {"pr":"陕西省 ","num":10 },
-    {"pr":"四川省 ","num":21 },
-    {"pr":"西藏自治区 ","num":1 },
-    {"pr":"新疆维吾尔自治区 ","num":5 },
-    {"pr":"云南省 ","num":12 },
-    {"pr":"浙江省 ","num":7 },
-    {"pr":"重庆市 ","num":6},
-    ];
-    map.centerAndZoom(point, 10);             // 初始化地图，设置中心点坐标和地图级别
-	map.setCurrentCity("亳州");		//设置当前显示城市
-    map.enableScrollWheelZoom(); // 允许滚轮缩放
-
-    var points =[
-    {"lng":"118.8004110 ","lat":"30.0288960 ","count":"20"},
-    {"lng":"115.9603640 ","lat":"30.8257450 ","count":"20"},
-    {"lng":"115.9603640 ","lat":"30.8257450 ","count":"20"},
-    {"lng":"116.4005290 ","lat":"30.9673540 ","count":"20"},
-    {"lng":"115.8972050 ","lat":"33.7982050 ","count":"20"},
-    {"lng":"115.7871920 ","lat":"33.9402800 ","count":"20"},
-    {"lng":"115.6710360 ","lat":"33.8759740 ","count":"20"},
-    {"lng":"115.8462900 ","lat":"33.8052960 ","count":"20"},
-    {"lng":"115.8416880 ","lat":"33.9455130 ","count":"20"},
-    {"lng":"115.8856610 ","lat":"33.9105480 ","count":"20"},
-    {"lng":"117.0349790 ","lat":"30.1173480 ","count":"20"},
-    {"lng":"118.4434210 ","lat":"32.4588850 ","count":"20"},
-    {"lng":"118.1275310 ","lat":"32.2878620 ","count":"20"},
-    {"lng":"116.0198300 ","lat":"31.1935750 ","count":"20"},
-    {"lng":"115.6871800 ","lat":"31.7507310 ","count":"20"},
-    {"lng":"115.4855380 ","lat":"33.4833870 ","count":"20"},
-    {"lng":"117.8738920 ","lat":"30.9280760 ","count":"20"},
-    {"lng":"118.0303410 ","lat":"30.8788090 ","count":"20"},
-    {"lng":"116.9512000 ","lat":"34.1952740 ","count":"20"},
-    {"lng":"118.0905970 ","lat":"30.8221460 ","count":"20"},
-    {"lng":"118.3831530 ","lat":"30.2077630 ","count":"20"},
-    {"lng":"118.6601190 ","lat":"31.0363510 ","count":"20"},
-    {"lng":"118.8297330 ","lat":"30.8312860 ","count":"20"},
-    {"lng":"117.2118480 ","lat":"26.3606180 ","count":"20"},
-    {"lng":"118.1966070 ","lat":"26.1771230 ","count":"20"},
-    {"lng":"119.7553040 ","lat":"27.1613680 ","count":"20"},
-    {"lng":"119.9042660 ","lat":"27.2419500 ","count":"20"},
-    {"lng":"104.7022770 ","lat":"34.9666660 ","count":"20"},
-    {"lng":"104.0646620 ","lat":"34.4552320 ","count":"20"},
-    {"lng":"104.2350100 ","lat":"35.1423950 ","count":"20"},
-    {"lng":"96.7782940 ","lat":"40.5107080 ","count":"20"},
-    {"lng":"103.3578480 ","lat":"35.4300390 ","count":"20"},
-    {"lng":"104.4003920 ","lat":"34.0542370 ","count":"20"},
-    {"lng":"104.4451310 ","lat":"35.0866030 ","count":"20"},
-    {"lng":"100.7342570 ","lat":"38.6519630 ","count":"20"},
-    {"lng":"108.3668700 ","lat":"35.4982540 ","count":"20"},
-    {"lng":"105.0164790 ","lat":"34.5223720 ","count":"20"},
-    {"lng":"103.9686640 ","lat":"35.1469900 ","count":"20"},
-    {"lng":"103.6127530 ","lat":"38.9055640 ","count":"20"},
-    {"lng":"105.2116350 ","lat":"34.0035460 ","count":"20"},
-    {"lng":"97.7438010 ","lat":"40.3098940 ","count":"20"},
-    {"lng":"100.4864710 ","lat":"38.9362250 ","count":"20"},
-    {"lng":"100.8847120 ","lat":"38.5130050 ","count":"20"},
-    {"lng":"100.5007430 ","lat":"38.5431480 ","count":"20"},
-    {"lng":"110.5998140 ","lat":"22.0057480 ","count":"20"},
-    {"lng":"112.3463070 ","lat":"23.3593530 ","count":"20"},
-    {"lng":"100.6826800 ","lat":"38.7086050 ","count":"20"},
-    {"lng":"116.1581370 ","lat":"23.3085130 ","count":"20"},
-    {"lng":"111.6108750 ","lat":"22.0421490 ","count":"20"},
-    {"lng":"110.1715750 ","lat":"20.3291390 ","count":"20"},
-    {"lng":"112.3008720 ","lat":"23.1833830 ","count":"20"},
-    {"lng":"112.1229190 ","lat":"23.4111270 ","count":"20"},
-    {"lng":"109.1160680 ","lat":"22.1132690 ","count":"20"},
-    {"lng":"107.5393800 ","lat":"21.6212100 ","count":"20"},
-    {"lng":"110.9327450 ","lat":"22.9127070 ","count":"20"},
-    {"lng":"108.6242780 ","lat":"24.3189120 ","count":"20"},
-    {"lng":"110.1588060 ","lat":"22.6096100 ","count":"20"},
-    {"lng":"110.1839440 ","lat":"22.6251990 ","count":"20"},
-    {"lng":"109.9905970 ","lat":"24.9862120 ","count":"20"},
-    {"lng":"109.2672730 ","lat":"22.6853520 ","count":"20"},
-    {"lng":"108.1265250 ","lat":"28.2703600 ","count":"20"},
-    {"lng":"107.9231050 ","lat":"26.9120030 ","count":"20"},
-    {"lng":"105.1943580 ","lat":"25.4409410 ","count":"20"},
-    {"lng":"107.3937930 ","lat":"27.9378630 ","count":"20"},
-    {"lng":"107.9326060 ","lat":"27.1451350 ","count":"20"},
-    {"lng":"109.8481230 ","lat":"19.0437700 ","count":"20"},
-    {"lng":"115.3499960 ","lat":"38.4321980 ","count":"20"},
-    {"lng":"109.8481230 ","lat":"19.0437700 ","count":"20"},
-    {"lng":"115.3306350 ","lat":"38.4294560 ","count":"20"},
-    {"lng":"115.3158390 ","lat":"38.3986010 ","count":"20"},
-    {"lng":"114.8071780 ","lat":"36.5532390 ","count":"20"},
-    {"lng":"114.5239080 ","lat":"38.4021100 ","count":"20"},
-    {"lng":"114.5206940 ","lat":"37.2972930 ","count":"20"},
-    {"lng":"115.0509270 ","lat":"37.2219860 ","count":"20"},
-    {"lng":"114.7776100 ","lat":"37.3561280 ","count":"20"},
-    {"lng":"113.2788350 ","lat":"35.0685320 ","count":"20"},
-    {"lng":"111.6224680 ","lat":"33.7912030 ","count":"20"},
-    {"lng":"111.7487620 ","lat":"33.7724910 ","count":"20"},
-    {"lng":"113.3330030 ","lat":"33.1622020 ","count":"20"},
-    {"lng":"111.7417420 ","lat":"33.6246860 ","count":"20"},
-    {"lng":"111.8958780 ","lat":"32.9080190 ","count":"20"},
-    {"lng":"113.7178350 ","lat":"35.7744070 ","count":"20"},
-    {"lng":"112.4611590 ","lat":"34.6271320 ","count":"20"},
-    {"lng":"111.6598980 ","lat":"34.3942580 ","count":"20"},
-    {"lng":"111.8966700 ","lat":"34.0766890 ","count":"20"},
-    {"lng":"112.3443710 ","lat":"34.3831640 ","count":"20"},
-    {"lng":"112.8643170 ","lat":"34.9309410 ","count":"20"},
-    {"lng":"112.5975120 ","lat":"33.6712720 ","count":"20"},
-    {"lng":"113.7856100 ","lat":"32.7494520 ","count":"20"},
-    {"lng":"112.9676180 ","lat":"34.9189740 ","count":"20"},
-    {"lng":"113.1562010 ","lat":"35.0369540 ","count":"20"},
-    {"lng":"113.0012500 ","lat":"34.9208580 ","count":"20"},
-    {"lng":"113.2274320 ","lat":"34.9902220 ","count":"20"},
-    {"lng":"113.2392650 ","lat":"35.0443610 ","count":"20"},
-    {"lng":"111.4182730 ","lat":"33.5715230 ","count":"20"},
-    {"lng":"115.4264890 ","lat":"32.4790110 ","count":"20"},
-    {"lng":"115.0589670 ","lat":"32.1382300 ","count":"20"},
-    {"lng":"114.5813450 ","lat":"32.7772270 ","count":"20"},
-    {"lng":"113.8570810 ","lat":"34.6884230 ","count":"20"},
-    {"lng":"114.4262190 ","lat":"35.0472620 ","count":"20"},
-    {"lng":"130.5319890 ","lat":"44.9252380 ","count":"20"},
-    {"lng":"129.2298860 ","lat":"44.1188550 ","count":"20"},
-    {"lng":"124.8060770 ","lat":"46.1464220 ","count":"20"},
-    {"lng":"128.3904290 ","lat":"44.9620540 ","count":"20"},
-    {"lng":"127.3431210 ","lat":"49.4321020 ","count":"20"},
-    {"lng":"132.2046350 ","lat":"46.3328490 ","count":"20"},
-    {"lng":"133.9037890 ","lat":"48.2233910 ","count":"20"},
-    {"lng":"112.0637860 ","lat":"31.4016560 ","count":"20"},
-    {"lng":"110.0391490 ","lat":"29.8876780 ","count":"20"},
-    {"lng":"115.0588400 ","lat":"30.8028680 ","count":"20"},
-    {"lng":"115.0588400 ","lat":"30.8028680 ","count":"20"},
-    {"lng":"115.6783990 ","lat":"30.7553250 ","count":"20"},
-    {"lng":"108.7113450 ","lat":"30.2717580 ","count":"20"},
-    {"lng":"109.0173870 ","lat":"30.2405790 ","count":"20"},
-    {"lng":"115.4049990 ","lat":"30.7908340 ","count":"20"},
-    {"lng":"115.3384590 ","lat":"30.2924680 ","count":"20"},
-    {"lng":"110.8049350 ","lat":"32.6348600 ","count":"20"},
-    {"lng":"110.7474500 ","lat":"32.0615120 ","count":"20"},
-    {"lng":"110.6800220 ","lat":"32.0741750 ","count":"20"},
-    {"lng":"110.4579660 ","lat":"32.0133470 ","count":"20"},
-    {"lng":"114.9596490 ","lat":"30.8161060 ","count":"20"},
-    {"lng":"112.1281280 ","lat":"32.0858450 ","count":"20"},
-    {"lng":"111.8691530 ","lat":"31.7770640 ","count":"20"},
-    {"lng":"112.1776930 ","lat":"31.8631210 ","count":"20"},
-    {"lng":"111.7950780 ","lat":"30.8260650 ","count":"20"},
-    {"lng":"110.5110100 ","lat":"30.6167140 ","count":"20"},
-    {"lng":"112.6024150 ","lat":"30.9948780 ","count":"20"},
-    {"lng":"112.3135790 ","lat":"31.6541840 ","count":"20"},
-    {"lng":"110.6825840 ","lat":"27.4634960 ","count":"20"},
-    {"lng":"111.8653840 ","lat":"27.3273250 ","count":"20"},
-    {"lng":"110.9461220 ","lat":"27.3657930 ","count":"20"},
-    {"lng":"110.7588230 ","lat":"27.5233410 ","count":"20"},
-    {"lng":"109.4769520 ","lat":"29.4109130 ","count":"20"},
-    {"lng":"112.3619680 ","lat":"28.7696400 ","count":"20"},
-    {"lng":"112.5474470 ","lat":"29.5355360 ","count":"20"},
-    {"lng":"128.9076520 ","lat":"43.1251020 ","count":"20"},
-    {"lng":"127.2922620 ","lat":"42.4414580 ","count":"20"},
-    {"lng":"126.8147910 ","lat":"42.3891470 ","count":"20"},
-    {"lng":"125.7512230 ","lat":"42.2908480 ","count":"20"},
-    {"lng":"125.7657820 ","lat":"41.6854830 ","count":"20"},
-    {"lng":"119.6982580 ","lat":"31.7863070 ","count":"20"},
-    {"lng":"118.7368320 ","lat":"33.9509660 ","count":"20"},
-    {"lng":"117.8197710 ","lat":"33.9442080 ","count":"20"},
-    {"lng":"120.3613020 ","lat":"33.5878370 ","count":"20"},
-    {"lng":"114.8946380 ","lat":"25.4606380 ","count":"20"},
-    {"lng":"114.2495390 ","lat":"26.9510920 ","count":"20"},
-    {"lng":"115.7627720 ","lat":"29.3191190 ","count":"20"},
-    {"lng":"115.0381400 ","lat":"26.8980530 ","count":"20"},
-    {"lng":"114.8529780 ","lat":"27.9136090 ","count":"20"},
-    {"lng":"115.5367870 ","lat":"28.0542880 ","count":"20"},
-    {"lng":"125.0457640 ","lat":"41.7410550 ","count":"20"},
-    {"lng":"124.9243710 ","lat":"42.0958860 ","count":"20"},
-    {"lng":"124.7340650 ","lat":"42.7434780 ","count":"20"},
-    {"lng":"108.2739730 ","lat":"41.0938070 ","count":"20"},
-    {"lng":"118.8013940 ","lat":"42.1153170 ","count":"20"},
-    {"lng":"118.8604190 ","lat":"41.5687790 ","count":"20"},
-    {"lng":"124.6252270 ","lat":"49.7455680 ","count":"20"},
-    {"lng":"121.3253220 ","lat":"43.6063670 ","count":"20"},
-    {"lng":"105.6840300 ","lat":"37.5042540 ","count":"20"},
-    {"lng":"105.6776950 ","lat":"37.5034430 ","count":"20"},
-    {"lng":"101.2627460 ","lat":"36.6880930 ","count":"20"},
-    {"lng":"115.6877590 ","lat":"34.7069650 ","count":"20"},
-    {"lng":"115.4079390 ","lat":"34.8512870 ","count":"20"},
-    {"lng":"115.5574210 ","lat":"35.3980820 ","count":"20"},
-    {"lng":"118.9801370 ","lat":"35.9226040 ","count":"20"},
-    {"lng":"115.4873620 ","lat":"36.5683150 ","count":"20"},
-    {"lng":"115.5417820 ","lat":"35.3960540 ","count":"20"},
-    {"lng":"116.4613560 ","lat":"36.1183820 ","count":"20"},
-    {"lng":"117.3021620 ","lat":"36.8019810 ","count":"20"},
-    {"lng":"117.3188020 ","lat":"29.0332750 ","count":"20"},
-    {"lng":"117.3483000 ","lat":"28.9957350 ","count":"20"},
-    {"lng":"116.3914750 ","lat":"36.2440490 ","count":"20"},
-    {"lng":"116.5537440 ","lat":"35.7211380 ","count":"20"},
-    {"lng":"118.3194910 ","lat":"35.0782800 ","count":"20"},
-    {"lng":"118.6344250 ","lat":"35.7954610 ","count":"20"},
-    {"lng":"118.8633710 ","lat":"36.0232630 ","count":"20"},
-    {"lng":"117.9233000 ","lat":"35.9289220 ","count":"20"},
-    {"lng":"118.3884950 ","lat":"35.5748200 ","count":"20"},
-    {"lng":"116.9117290 ","lat":"35.1402980 ","count":"20"},
-    {"lng":"117.4838550 ","lat":"34.6674890 ","count":"20"},
-    {"lng":"118.1966020 ","lat":"36.4586170 ","count":"20"},
-    {"lng":"117.7840290 ","lat":"35.8263520 ","count":"20"},
-    {"lng":"113.4729780 ","lat":"35.8005090 ","count":"20"},
-    {"lng":"111.6135530 ","lat":"35.6177100 ","count":"20"},
-    {"lng":"111.9276250 ","lat":"36.2724010 ","count":"20"},
-    {"lng":"111.4482750 ","lat":"35.8818140 ","count":"20"},
-    {"lng":"111.6508360 ","lat":"35.7626000 ","count":"20"},
-    {"lng":"110.8456570 ","lat":"35.4486550 ","count":"20"},
-    {"lng":"111.0522440 ","lat":"35.0913410 ","count":"20"},
-    {"lng":"111.3369100 ","lat":"35.3052460 ","count":"20"},
-    {"lng":"111.1276620 ","lat":"35.5120020 ","count":"20"},
-    {"lng":"111.8918260 ","lat":"35.2718450 ","count":"20"},
-    {"lng":"113.1230100 ","lat":"36.2012940 ","count":"20"},
-    {"lng":"112.5180420 ","lat":"36.2951910 ","count":"20"},
-    {"lng":"107.9968890 ","lat":"33.5302370 ","count":"20"},
-    {"lng":"109.2710070 ","lat":"32.8838720 ","count":"20"},
-    {"lng":"107.3405840 ","lat":"33.1619280 ","count":"20"},
-    {"lng":"110.1551940 ","lat":"35.2432040 ","count":"20"},
-    {"lng":"110.3464110 ","lat":"33.6955170 ","count":"20"},
-    {"lng":"108.9460540 ","lat":"34.3469000 ","count":"20"},
-    {"lng":"108.4849040 ","lat":"34.0835860 ","count":"20"},
-    {"lng":"109.3303030 ","lat":"34.1571110 ","count":"20"},
-    {"lng":"108.2287310 ","lat":"34.1689310 ","count":"20"},
-    {"lng":"102.7952790 ","lat":"29.2094190 ","count":"20"},
-    {"lng":"106.4466600 ","lat":"30.5435110 ","count":"20"},
-    {"lng":"106.2963530 ","lat":"32.2344460 ","count":"20"},
-    {"lng":"102.2643430 ","lat":"27.0608830 ","count":"20"},
-    {"lng":"104.8558770 ","lat":"30.3833340 ","count":"20"},
-    {"lng":"102.2705100 ","lat":"27.8998210 ","count":"20"},
-    {"lng":"103.8251480 ","lat":"30.2444610 ","count":"20"},
-    {"lng":"104.3144140 ","lat":"31.8972070 ","count":"20"},
-    {"lng":"104.5361330 ","lat":"32.4095440 ","count":"20"},
-    {"lng":"104.9379560 ","lat":"31.2869880 ","count":"20"},
-    {"lng":"105.0153120 ","lat":"31.1588920 ","count":"20"},
-    {"lng":"103.7871750 ","lat":"30.2280580 ","count":"20"},
-    {"lng":"103.9957850 ","lat":"31.0976680 ","count":"20"},
-    {"lng":"104.0770990 ","lat":"31.0829940 ","count":"20"},
-    {"lng":"105.5340300 ","lat":"30.5665840 ","count":"20"},
-    {"lng":"102.3710880 ","lat":"29.2336010 ","count":"20"},
-    {"lng":"104.5672170 ","lat":"31.0210180 ","count":"20"},
-    {"lng":"104.6299200 ","lat":"30.9226930 ","count":"20"},
-    {"lng":"102.8532530 ","lat":"29.7988100 ","count":"20"},
-    {"lng":"104.5434160 ","lat":"28.7016580 ","count":"20"},
-    {"lng":"91.1210610 ","lat":"29.6499620 ","count":"20"},
-    {"lng":"87.4933680 ","lat":"47.1180820 ","count":"20"},
-    {"lng":"89.7495410 ","lat":"43.6762560 ","count":"20"},
-    {"lng":"82.9897320 ","lat":"46.2061920 ","count":"20"},
-    {"lng":"80.8854790 ","lat":"44.0618770 ","count":"20"},
-    {"lng":"81.2844610 ","lat":"43.9146700 ","count":"20"},
-    {"lng":"97.9382300 ","lat":"24.7107690 ","count":"20"},
-    {"lng":"103.6733020 ","lat":"25.0352250 ","count":"20"},
-    {"lng":"98.4969220 ","lat":"25.0258170 ","count":"20"},
-    {"lng":"99.3769030 ","lat":"25.8913540 ","count":"20"},
-    {"lng":"100.2322670 ","lat":"25.5883310 ","count":"20"},
-    {"lng":"102.7899200 ","lat":"24.9529170 ","count":"20"},
-    {"lng":"99.0885190 ","lat":"23.5597290 ","count":"20"},
-    {"lng":"100.1298030 ","lat":"24.4428060 ","count":"20"},
-    {"lng":"104.4887690 ","lat":"24.9738650 ","count":"20"},
-    {"lng":"103.9919180 ","lat":"24.8277960 ","count":"20"},
-    {"lng":"104.0891300 ","lat":"23.4016320 ","count":"20"},
-    {"lng":"100.6327550 ","lat":"26.3116370 ","count":"20"},
-    {"lng":"120.4520400 ","lat":"30.5341990 ","count":"20"},
-    {"lng":"119.1268780 ","lat":"29.8533660 ","count":"20"},
-    {"lng":"120.1696930 ","lat":"30.7826880 ","count":"20"},
-    {"lng":"120.2485070 ","lat":"29.2950600 ","count":"20"},
-    {"lng":"120.0740110 ","lat":"28.6535850 ","count":"20"},
-    {"lng":"120.3863550 ","lat":"28.9512520 ","count":"20"},
-    {"lng":"120.4862460 ","lat":"28.7422470 ","count":"20"},
-    {"lng":"106.5033630 ","lat":"29.5050610 ","count":"20"},
-    {"lng":"107.6627500 ","lat":"30.1083700 ","count":"20"},
-    {"lng":"109.2707210 ","lat":"30.6455260 ","count":"20"},
-    {"lng":"108.4967680 ","lat":"30.2547080 ","count":"20"},
-    {"lng":"109.0135990 ","lat":"28.4537890 ","count":"20"},
-    {"lng":"106.5560850 ","lat":"29.6228470 ","count":"20"},
-    {"lng":"112.1295270 ","lat":"33.7984790 ","count":"20"},
-    {"lng":"117.8659960 ","lat":"35.7028970 ","count":"20"},
-    {"lng":"110.1671130 ","lat":"33.7462190 ","count":"20"},
-    {"lng":"115.8827710 ","lat":"33.8541150 ","count":"20"},
-    {"lng":"117.6988700 ","lat":"34.2774520 ","count":"20"},
-    {"lng":"120.2670860 ","lat":"34.2110660 ","count":"20"},
-    {"lng":"115.0270130 ","lat":"31.2728600 ","count":"20"},
-    {"lng":"104.7374310 ","lat":"31.7821310 ","count":"20"},
-    {"lng":"113.8255210 ","lat":"36.0721190 ","count":"20"},
-    {"lng":"116.3608950 ","lat":"26.3326290 ","count":"20"},
-    {"lng":"113.7768570 ","lat":"27.6491200 ","count":"20"},
-    {"lng":"105.7212640 ","lat":"27.0488550","count":"20"}
-    ];//这里面添加经纬度
-    addMarker(points);
-
-
-    if(!isSupportCanvas()){
-        alert('热力图目前只支持有canvas支持的浏览器,您所使用的浏览器不能使用热力图功能~')
-    }
-    
-    heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":20,"visible":true});
-    map.addOverlay(heatmapOverlay);
-    heatmapOverlay.setDataSet({data:points,max:1});
-
-    //heatMap
-      var max = 0;
-      var min = 1000;
-      for(var i=0, Lens = test.length; i<Lens; i++) {
-        console.log(typeof(test[i].num));
-        if(max<test[i].num)
-          max = test[i].num;
-        if(min>test[i].num)
-          min = test[i].num;
-      }
-      //console.log(max);
-      //console.log(min);
-      //console.log(max-min);
-      var gap = (max-min)/9;
-      console.log(gap);
-      for(var i=0, Lens = test.length; i<Lens; i++) {
-        console.log(Math.round((test[i].num - min)/gap));
-        getBoundary(test[i].pr,Math.round((test[i].num - min)/gap));
-      }
-      //getBoundary("新疆维吾尔自治区",5);
-      var buckets = 9;        // 一共9种颜色级别
-      var colors = ["#FFCC00","#FFB300","#FF9900","#FF8000","#FF6600","#FF4D00","#FF3300","#FF1A00","#FF0000"];
-      function getBoundary(sRegion,level) {
-
-        var bdary = new BMap.Boundary();
-        bdary.get(sRegion, function (rs) { //获取行政区域
-         var count = rs.boundaries.length; //行政区域的点有多少个
-         for (var i = 0; i < count; i++) {
-          var ply = new BMap.Polygon(rs.boundaries[i], { strokeWeight: 1, strokeColor: "#4A7300", fillColor: colors[level] }); //建立多边形覆盖物
-          map.addOverlay(ply); //添加覆盖物
-         }
-        });
-      }
-
-
-    //getpr_stnum(points);
-    var total_num=0;
-    //heatmapOverlay.disableMassClear();
-    function getpr_stnum(points){
-        for(var i=0, pointsLen = points.length; i<100; i++) {
-            var lat = points[i].lat;
-            var lng = points[i].lng;
-            var str = lat.toString()+","+lng.toString();
-            //console.log(i);
-            getpoint_add(str);
-            //console.log(pr);
-        }
-        console.log(points.length);
-        
-    }
-    function getpoint_add(str){//获取每个省市的站点数
-        
-        //var str = "30.0288960,118.8004110";
-        $(function(){
-            $.ajax({
-                async: false,
-                type: "post",
-                dataType: 'jsonp',
-                //jsonp: 'callback',
-                //jsonpCallback: 'callbackfunction',
-                url: "http://api.map.baidu.com/geocoder/v2/?output=json&ak=zkbRSzjGckkGXwuIr9aMmDoztG8ajGAZ",
-                data: {location: str},
-                timeout: 3000,
-                contentType: "application/json;utf-8",
-                success: function(msg) {
-                    total_num+=1;
-                    var pr = msg.result.addressComponent.province;
-                    provinces.push(pr);
-                    if(total_num==266)
-                    {
-                        count(provinces);
-
-                        //console.log(provinces.length);
+                if(this.getZoom()<=6 && overlay_exist==0){
+                    show_polygon();
+                    //startOverLay();
+                    overlay_exist=1;
+                    map.removeEventListener("click",MapClick);
+                    if(nowlevel == 2){
+                        for(var j=0,lens = arr_points.length;j < lens;j++){
+                            if(j==27){
+                                for(var k=0,lens = arr1.length;k < lens;k++){
+                                    var ppp = arr1.pop();
+                                    map.removeOverLay(ppp);
+                                }
+                                
+                            }
+                            if(j>27){
+                                arr_points.pop();
+                                arr_names.pop();
+                            }
+                            
+                        }
                     }
                     
-                },
-                error:function(msg){
-                    console.log(msg);
                 }
+                if(this.getZoom()==7 && overlay_exist==1){
+                    hide_polygon();
+                    overlay_exist=0;
+                    map.addEventListener("click",MapClick);
+                }
+                
             });
-        })
+            startOverLay();
+            
+            
+        }
+
+        function MapClick(e){
+            if(timeoutID) {//取消上次延时未执行的方法
+                timeoutID = clearTimeout(timeoutID);
+            }
+            timeoutID= window.setTimeout(function(){//消除双击=2*单击
+                hide_polygon();
+                map.centerAndZoom(new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat()), 7);
+                overlay_exist=0;
+
+                geocode.getLocation(e.lnglat,searchResult1);
+            }, 300);
+            
+        }
+        function startOverLay(){
+            for(var i=0, Lens = ytw_data.prlist.length; i<Lens; i++) {
+                str = ytw_data.prlist[i].pr;
+
+                addLayer(str,false);
+            }
+            overlay_exist=1;
+        }
+        function addLayer(name,flag){
+            administrative = new T.AdministrativeDivision();
+            
+            var config = {
+                needSubInfo: flag,
+                needAll: flag,
+                needPolygon: true,
+                needPre: true,
+                searchType: 1,
+                searchWord: name
+                //searchWord: ytw_data.prlist[0].pr
+            };
+            administrative.search(config, searchResult);
+
+
+        }
         
-    }
+        function searchResult(result)
+        {
+            //console.log(result);
+            if(result.getStatus() == 100) {
+                var data = result.getData();
+                showMsg(data); 
+                //document.getElementById("administrativeMsg").innerHTML = html; 
+            }
+            else {
+                result.getMsg();
+            }
+        }
 
-    function count(data){
-        var data1 = new Array();
+        function searchResult1(result)
+        {
+            console.log("searchResult1");
+            var address = result.getAddress();
+            var name = address.substr(0,2)
+            //var start_index = 0;
+            // for(var i =0,lens = arr_names.length;i<lens;i++){//把所有的覆盖物隐藏，这样可以加速
+            //     var str = arr_names[i].substr(0,2);
+            //     if(str == name){
+            //         for(var k=0,j=start_index,lens = arr_points[i];k<lens;k++){
+            //             var ppp = arr[j+k];
+            //             //ppp.show();
+            //         }
+            //         break;
+            //     }
+            //     start_index+=arr_points[i];
+            // }
+            addLayer(name,true);
 
-        for(var i=0, Lens = data.length; i<Lens; i++) {
-            var flag = 0;//0:不存在   1:存在
-            for(var j=0, Lens1 = data1.length; j<Lens1; j++) {
-                if(data[i]==data1[j])//已存在
-                {
-                    flag=1;
-                    break;
+        }
+
+        function showMsg(data){
+            var name = data[0].name;
+            //console.log(data);
+            for(var i = 0; i < data.length; i++){
+                //解释上级行政区划
+                /*
+                if(data[i].parents){
+                    var upLevel = "";
+                    if(data[i].parents.country){
+                        upLevel += data[i].parents.country.name;
+                    }
+                    if(data[i].parents.province){
+                        upLevel += data[i].parents.province.name;
+                    }
+                
+                }
+                */
+                
+                if(data[i].points && !data[i].child){
+                    //绘制行政区划
+                    //nowlevel=1;
+                    //console.log("nowlevel=1");
+                    polygon(data[i].points,name);
+                }
+                
+                
+                if(data[i].child){
+                    nowlevel=2;
+                    //var start_index = 0;
+                    //console.log("nowlevel=2");
+                    for(var j=27,lens = arr_points.length;j < lens;j++){
+                        if(j==27){
+                            for(var k=0,lens = arr1.length;k < lens;k++){
+                                var ppp = arr1.pop();
+                                map.removeOverLay(ppp);
+                            }
+                            
+                        }
+                        if(j>27){
+                            arr_points.pop();
+                            arr_names.pop();
+                        }
+                        
+                    }
+                    for(var j = 0; j < data[i].child.length; j++){
+                        console.log(data[0].child[j].name);
+                        addLayer(data[0].child[j].name,false);
+                    }
+                }
+                
+            }
+        }
+    
+        function polygon(points,name){
+            var pointsArr = [];
+            var color = "white";
+            var num=0;
+            nowindex = nowindex+1;
+            //console.log("polygon");
+            for (var i = 0; i < ytw_data.prlist.length; i++) {
+                if(ytw_data.prlist[i].pr == name){
+                    var gap = (ytw_data.max - ytw_data.min) / 6;
+                    num = ytw_data.prlist[i].num;
+                    color = colors[Math.round((ytw_data.prlist[i].num - ytw_data.min)/gap)];
                 }
             }
-            if(!flag)
-                data1.push(data[i]);
-        }
-        for(var j=0, Lens1 = data1.length; j<Lens1; j++) {
-            //console.log(data1[j]);
-            provinces_num[data1[j]] = 0;
-        }
-        for(var i=0, Lens = data.length; i<Lens; i++) {
-            provinces_num[data[i]] += 1;
-        }
-        /*var tt=0;
-        for(var j=0, Lens1 = data1.length; j<Lens1; j++) {
-            console.log(data1[j]);
-            console.log(provinces_num[data1[j]]);
-            tt+=provinces_num[data1[j]];
-        }
-        console.log(tt);*/
+            if(nowlevel==2){
+                //console.log(parseInt(Math.random()*(7),10));
+                color = colors[parseInt(Math.random()*(7),10)];
+            }
+            //console.log(name+points.length);
+            arr_points.push(points.length);
+            arr_names.push(name);
+            for (var i = 0; i < points.length; i++) {
+                var regionLngLats = [];
+                var regionArr = points[i].region.split(",");
+                for (var m = 0; m < regionArr.length; m++) {
+                    var lnglatArr = regionArr[m].split(" ");
+                    var lnglat = new T.LngLat(lnglatArr[0], lnglatArr[1]);
+                    regionLngLats.push(lnglat);
+                    pointsArr.push(lnglat);
+                }
+                //创建面对象
+                
+                var polygon = new T.Polygon(regionLngLats,{color: "white", weight: 1, opacity: 0.5, fillColor: color, fillOpacity: 0.7});
+                //console.log(nowindex);
+                //向地图上添加行政区划面
+                polygon.addEventListener("mouseover",function(e){
+                    this.setColor("#0000ff");
+                    this.setWeight(5);
+                    //this.setFillOpacity(0);
+                    //console.log(this);
+                    var content = name + '<br> <hr />' + "信息站数："+num;
+                    openInfo(content,e);
 
-    }
-    //创建标注点并添加到地图中
-    function addMarker(points) {
-        //循环建立标注点
-        //console.log("add!");
-        markers = [];
-        for(var i=0, pointsLen = points.length; i<pointsLen; i++) {
-            var point = new BMap.Point(points[i].lng, points[i].lat); //将标注点转化成地图上的点
-            var marker = new BMap.Marker(point); //将点转化成标注点
-            map.addOverlay(marker);  //将标注点添加到地图上
-            markers.push(marker);
-            //添加监听事件
-            (function() {
-                var thePoint = points[i];
-                marker.addEventListener("click",
-                    function() {
-                        showInfo(this,thePoint);
-                    });
-            })();  
+                    //polygon.hide();
+                });
+                polygon.addEventListener("mouseout",function(e){
+                    this.setColor("white");
+                    this.setWeight(1);
+                    //this.setFillOpacity(0.7);
+                    //polygon.show();
+                });
+                polygon.addEventListener("dblclick",function(e){
+                    if(timeoutID) {//取消上次延时未执行的方法
+                        timeoutID = clearTimeout(timeoutID);
+                    }
+                    
+                    if(map.getZoom()<7 &&!dblclick_flag){
+                        dblclick_flag=1;
+                        console.log(e);
+                        hide_polygon();
+                        map.centerAndZoom(new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat()), 7);
+                        overlay_exist=0;
+                        map.addEventListener("click",MapClick);
+                        geocode.getLocation(e.lnglat,searchResult1);
+                        //
+                    }
+                    
+                });
+                polygon.addEventListener("click",function(e){
+
+                    if(map.getZoom()==7 ){
+                        hide_polygon();
+                        map.centerAndZoom(new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat()), 7);
+                        overlay_exist=0;
+                        //this.show();
+                    }
+                    
+                });
+                if(nowlevel==1){
+                    arr.push(polygon);
+                }else{
+                    arr1.push(polygon);
+                }
+                
+                //map.addOverLay(polygon);
+            }
+            if(nowindex == 28 && nowlevel ==1 ) {
+                for(var i = 0,len = arr.length; i < len; i++) {
+                    map.addOverLay(arr[i]);
+                }
+                nowindex = 0;
+                console.log(map.getOverlays().length);
+            }
+            //console.log("nowlevel"+nowlevel);
+            if(nowlevel==2){
+                //console.log("add");
+                nowindex = 0;
+                for(var i = 0,len = arr1.length; i < len; i++) {
+                    map.addOverLay(arr1[i]);
+                }
+                dblclick_flag=0;
+            }
+            //显示最佳比例尺
+            //map.setViewport(pointsArr);
         }
-    }
-    function showMarker(points){
-        for(var i = 0;i<markers.length;i++) {
-            markers[i].show(); 
+
+        function hide_polygon(){
+            var arr_overlay = map.getOverlays();
+            for(var i =0,lens = arr_overlay.length;i<lens;i++){//把所有的覆盖物隐藏，这样可以加速
+                var polygon = arr_overlay.pop();
+                try{
+                    polygon.hide();      
+                }catch(e){
+                    polygon.closeInfoWindow();
+                }
+                
+            }
         }
-    }
-    function hideMarker(points){
-        for(var i = 0;i<markers.length;i++) {    
-            markers[i].hide(); 
+
+        function show_polygon(){
+            var arr_overlay = map.getOverlays();
+            //console.log(arr_overlay.length);
+            for(var i =0,lens = arr_overlay.length;i<lens;i++){//把所有的覆盖物显示，这样可以加速
+                var polygon = arr_overlay.pop();
+                try{
+                    polygon.show();      
+                }catch(e){
+                    console.log("InfoWindow()");
+                }
+                           
+            }
         }
-    }
-    function showInfo(thisMarker,point) {
-        //获取点的信息
-        var sContent = 
-        '<ul style="margin:0 0 5px 0;padding:0.2em 0">'  
-        +'<li style="line-height: 26px;font-size: 15px;">'  
-        +'<span style="width: 100px;display: inline-block;">信息站名称：</span>' + point.name + '</li>'  
-        +'<li style="line-height: 26px;font-size: 15px;">'  
-        +'<span style="width: 100px;display: inline-block;">联系人姓名：</span>' + point.contact + '</li>'
-        +'<li style="line-height: 26px;font-size: 15px;">'  
-        +'<span style="width: 100px;display: inline-block;">联系方式：</span>' + point.tel + '</li>'   
-        +'</ul>';
-        var infoWindow = new BMap.InfoWindow(sContent); //创建信息窗口对象
-        thisMarker.openInfoWindow(infoWindow); //图片加载完后重绘infoWindow
-    }
 
-    function isSupportCanvas(){
-        var elem = document.createElement('canvas');
-        return !!(elem.getContext && elem.getContext('2d'));
-    }
+    
 
-    function setGradient(){
-        var gradient = {};
-        var colors = document.querySelectorAll("input[type='color']");
-        colors = [].slice.call(colors,0);
-        colors.forEach(function(ele){
-            gradient[ele.getAttribute("data-key")] = ele.value;
-        });
-        heatmapOverlay.setOptions({"gradient":gradient});
-    }
-
-    function openHeatmap(){
-        heatmapOverlay.show();
-    }
-
-    function closeHeatmap(){
-        heatmapOverlay.hide();
-    }
-    function openMark(){
-        showMarker(points);
-    }
-    function closeMark(){
-        hideMarker(points);
-    }
-
-</script>
+        function openInfo(content,e){
+            var point = e.lnglat;
+            marker = new T.Marker(point);// 创建标注
+            var markerInfoWin = new T.InfoWindow(content,{offset:new T.Point(0,-30)}); // 创建信息窗口对象
+            map.openInfoWindow(markerInfoWin,point); //开启信息窗口
+            //console.log(marker);
+        }
+    </script>
+</head>
+<body onLoad="onLoad()">
+<div id="mapDiv" style="position:absolute;width:100%; height:100%"></div>
 </body>
 </html>

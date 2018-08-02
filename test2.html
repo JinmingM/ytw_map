@@ -1,0 +1,230 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/> 
+<meta name="keywords" content="天地图"/> 
+<title>天地图－地图API－范例－行政区划</title>
+<style type="text/css">body,html{width:100%;height:100%;margin:0;font-family:"Microsoft YaHei"}#mapDiv{width:100%;height:100%}input,b,p{margin-left:5px;font-size:14px}</style>
+<script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0"></script>
+<script type="text/javascript" src="area.js"></script>
+<script type="text/javascript" src="data1.js"></script>
+<script> 
+    var map; 
+    var zoom = 4; 
+    var administrative;
+    var arr = new Array();
+    var colors=["#FFFF24","#FFE210","#FFC100","#FF9F00","#FF7D08","#FF6900","#FF5702"];
+    var areaArr = [BeiJingArea,GuangdongArea,GuangxiArea,HebeiArea,GuizhouArea,FujianArea,GansuArea,AnhuiArea,JilinArea,HenanArea,HainanArea,HelongjiangArea,HubeiArea,HunanArea,JiangxiArea,NingxiaArea,QinghaiArea,ShangdongArea,JiangsuArea,LiaoningArea,SichuanArea,XizangArea,NeimengArea,ZhejiangArea,ShanxiArea,ShanxiArea1,XinjiangArea,YunnanArea,ChongqingArea];
+
+    
+    //console.log(BeiJingArea);
+    function onLoad() 
+    { 
+        //初始化地图对象 
+        map=new T.Map("mapDiv"); 
+        //设置显示地图的中心点和级别 
+        map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+        //console.log(HainanArea.area);
+        //polygon(HainanArea.area.points);
+        for (var i = 0,aLen = ANHUI.length; i < aLen; i++) {
+            //console.log(ANHUI1[i]);
+            //polygon(ANHUI[i].area.points);
+        };
+        //startOverLay();
+        str = ytw_data.prlist[0].pr;
+        //addLayer(str,true);
+        addLayer("新疆维吾尔自治区",true);
+    }
+
+    function startOverLay(){
+        for(var i=22, Lens = ytw_data.prlist.length; i<Lens; i++) {
+            str = ytw_data.prlist[i].pr;
+
+            addLayer(str,true);
+        }
+        overlay_exist=1;
+    }
+
+    function addLayer(name,flag){
+        administrative = new T.AdministrativeDivision();
+        
+        var config = {
+            needSubInfo: flag,
+            needAll: flag,
+            needPolygon: true,
+            needPre: true,
+            searchType: 1,
+            searchWord: name
+            //searchWord: ytw_data.prlist[0].pr
+        };
+        administrative.search(config, searchResult1);
+
+
+    }
+
+    function searchResult2(result)
+    {
+        console.log(result);
+        if(result.getStatus() == 100) {
+            var data = result.getData();
+            showMsg(data); 
+            //document.getElementById("administrativeMsg").innerHTML = html; 
+        }
+        else {
+            result.getMsg();
+        }
+    }
+
+    function searchResult(result)//省
+    {
+        var str = "";
+        var last=JSON.stringify(result);
+        console.log(last);
+        console.log(result.data[0].points.length);
+        str = "var "+result.data[0].englishabbrevation+"Area = {\"area\":{\"level\":\""+result.data[0].level+"\",\"lonlat\":\""+result.data[0].lnt+","+result.data[0].lat+"\",\"name\":\""+result.data[0].name+"\",\"points\":[{\"region\":\"";
+        for(var i=4,lens=result.data[0].points.length;i<lens;i++){
+            //console.log(i);
+            str+=result.data[0].points[i].region;
+            if(i<lens-1){
+                str+="\"},{\"region\":\"";
+            }
+        }
+        str+= "\"}],\"type\":\"1\"}}";
+        console.log(str);
+
+        console.log(result);
+        if(result.getStatus() == 100) 
+        {
+            var data = result.getData();
+            showMsg(data);
+            
+        }
+        else 
+        {
+            result.getMsg();
+        }
+    }
+
+    function searchResult1(result)//市
+    {
+        console.log(result);
+        
+        var last=JSON.stringify(result);
+        //console.log(last);
+        //console.log(result.data[0].child.length);
+        var str = "";
+        for(var i=0,lens=result.data[0].child.length;i<lens;i++){
+            console.log(result.data[0].child[i]);
+
+            
+            str += "var "+result.data[0].child[i].englishabbrevation+" = {\"area\":{\"level\":\""+result.data[0].child[i].level+"\",\"lonlat\":\""+result.data[0].child[i].lnt+","+result.data[0].child[i].lat+"\",\"name\":\""+result.data[0].child[i].name+"\",\"points\":[{\"region\":\"";
+            //console.log(result.data[0].child[i].points.length);
+            var lens1;
+            try{
+                lens1=result.data[0].child[i].points.length
+            }catch(e){
+                continue;
+            }
+            for(var j=0;j<lens1;j++){
+                //console.log(i);
+                str+=result.data[0].child[i].points[j].region;
+                if(j<lens1-1){
+                    str+="\"},{\"region\":\"";
+                }
+            }
+            str+= "\"}],\"type\":\"1\"}}; \n ";
+            
+        }
+        console.log(str);
+            //console.log(str);
+        
+        
+        
+
+        //console.log(result);
+        if(result.getStatus() == 100) 
+        {
+            var data = result.getData();
+            //showMsg(data);
+            
+        }
+        else 
+        {
+            result.getMsg();
+        }
+    }
+    
+    function showMsg(data){
+        //console.log(data);
+        for(var i = 0; i < data.length; i++){
+            
+            
+            //解释上级行政区划
+            if(data[i].parents){
+                var upLevel = "";
+                if(data[i].parents.country){
+                    upLevel += data[i].parents.country.name;
+                }
+                if(data[i].parents.province){
+                    upLevel += data[i].parents.province.name;
+                }
+               
+            }
+            
+            if(data[i].points){
+                //绘制行政区划
+                //console.log(data[i].points);
+                //polygon(data[i].points);
+            }
+            
+            //解释下级行政区划
+            if(data[i].child){
+                //showMsg(data[i].child);
+                //console.log(data[i].child.points);
+                if(data[i].child.points){
+                    //绘制行政区划
+                    //polygon(data[i].child.points);
+                }
+            }
+        }
+    }
+    
+    function polygon(points){
+        var pointsArr = [];
+        //console.log(points);
+        for (var i = 0; i < points.length; i++) {
+            var regionLngLats = [];
+            var regionArr = points[i].region.split(",");
+            var color = colors[parseInt(Math.random()*(7),10)];
+            for (var m = 0; m < regionArr.length; m++) {
+                var lnglatArr = regionArr[m].split(" ");
+                var lnglat = new T.LngLat(lnglatArr[0], lnglatArr[1]);
+                regionLngLats.push(lnglat);
+                //pointsArr.push(lnglat);
+            }
+            //创建面对象
+            //console.log(regionLngLats);
+            var polygon = new T.Polygon(regionLngLats,{color: "white", weight: 1, opacity: 0.5, fillColor: color, fillOpacity: 0.7});
+            polygon.addEventListener("mouseover",function(e){
+                this.setColor("#0000ff");
+                this.setWeight(5);
+                
+            });
+            polygon.addEventListener("mouseout",function(e){
+                this.setColor("white");
+                this.setWeight(1);
+                //this.setFillOpacity(0.7);
+                //polygon.show();
+            });
+            //向地图上添加行政区划面
+            map.addOverLay(polygon);
+        }
+        //显示最佳比例尺
+        //map.setViewport(pointsArr);
+    }
+</script> 
+</head> 
+<body onLoad="onLoad()"> 
+    <div id="mapDiv"></div> 
+</body>
+</html>

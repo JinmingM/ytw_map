@@ -1,24 +1,35 @@
+body,html{
+    width:100%;
+    height:100%;
+    margin:0;
+    font-family:"Microsoft YaHei"
+}
+#mapDiv{
+    width:100%;
+    height:400px
+}
 .legend {
     position:absolute;
     left:600px;
     top:550px;
-    background:url(color.png);
+    background:url(colorf1.png);
     opacity: 0.7;
-    width:126px; 
+    width:200px; 
     height:20px; 
     z-index:999
 }
 .list {
     position:absolute;
     width:400px;
-    top: 60px;
-    left:30px;
+    top: 75px;
+    left:50px;
     padding: 10px 15px;
     border-radius: 6px;
     background-color: rgba(0,0,0,0.35);
     text-align: center;
     z-index:999
 }
+
 
 .list-topbar{
     position: relative;
@@ -52,9 +63,16 @@
     color: rgba(255,255,255,0.5);
 }
 
+.table-wrap{
+    width: 100%;
+    height:425px;
+    overflow-y:auto;
+}
 /* list table */
 .list-table{
     width: 100%;
+    height:425px;
+    overflow-y:auto;
     border-collapse: collapse;
     border-spacing: 0;
 }
@@ -68,20 +86,20 @@
     white-space: nowrap;
 }
 .list-table th.province{
-    font-size: 18px;
+    font-size: 15px;
     color:#ffffff;
     width: 30%;
 }
 
 .list-table td.province,
 .list-table th.station-num {
-    font-size: 18px;
+    font-size: 15px;
     color:#ffffff;
     position: relative;
 }
 
 .list-table th.proportion{
-    font-size: 18px;
+    font-size: 15px;
     color:#ffffff;
     position: relative;
 }
@@ -100,9 +118,6 @@
 .list-table thead tr{
     border-top: none;
 }
-.list-table .tr0{
-    border-top: 2px solid rgba(255,255,255, 0.35);
-}
 
 .list-table tr .province{
     color: #FFFFFF;
@@ -117,18 +132,17 @@
 }
 .list-table td.index span{
     display:inline-block;
-    width: 12px;
-    height: 12px;
-    line-height: 12px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
     background-color: #007EFF;
     vertical-align: middle;
-    border-radius: 2px;
+    border-radius: 4px;
     text-align: center;
     font-size: 10px;
 }
 
 .list-table .proportion{
-
     color: #36BAFF;
 }
 .list-table span.txt{
@@ -150,6 +164,24 @@
 
 .list-table td.proportion .box{
     background-color: #36BAFF;
+}
+
+.list-table tr.tr0 td.index span,
+.list-table tr.tr1 td.index span,
+.list-table tr.tr2 td.index span{
+    background-color: #EE9D11;
+}
+
+
+
+::-webkit-scrollbar {
+    width: 10px;
+} 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.8); 
+} 
+::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.8); 
 }
 
 

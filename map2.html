@@ -5,8 +5,9 @@
     <title>基于地理位置的站点分布</title>
     <script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0"></script>
     <link rel="stylesheet" href="./css/index.css">
-    <script type="text/javascript" src="data1.js"></script>
-    <script type="text/javascript" src="area.js"></script>
+    <script type="text/javascript" src="js/data1.js"></script>
+    <script type="text/javascript" src="js/area.js"></script>
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="city/anhui.js"></script>
     <script type="text/javascript" src="city/fujian.js"></script>
     <script type="text/javascript" src="city/gansu.js"></script>
@@ -35,8 +36,8 @@
     <script type="text/javascript" src="city/yunnan.js"></script>
     <script type="text/javascript" src="city/zhejiang.js"></script>
     <script type="text/javascript" src="city/xinjiang.js"></script>
-    <script type="text/javascript" src="pr_city.js"></script>
-    <style type="text/css">body,html{width:100%;height:100%;margin:0;font-family:"Microsoft YaHei"}#mapDiv{width:100%;height:400px}input,b,p{margin-left:5px;font-size:14px}</style>
+    <script type="text/javascript" src="js/pr_city.js"></script>
+    <script type="text/javascript" src="js/func.js"></script>
     <script>
         var map;
         var zoom = 4;
@@ -45,329 +46,39 @@
         var arr = new Array();//利用数组保存p  用于隐藏显示
         var arr1 = new Array();
         var province = new Map([["安徽省",ANHUI],["福建省",FUJIAN],["甘肃省",GANSU],["广东省",GUANGDONG],["广西壮族自治区",GUANGXI],["贵州省",GUIZHOU],["海南省",HAINAN],["河北省",HEBEI],["河南省",HENAN],["黑龙江省",HEILONGJIANG],["吉林省",JILIN],["江苏省",JIANGSU],["湖北省",HUBEI],["湖南省",HUNAN],["宁夏回族自治区",NINGXIA],["江西省",JIANGXI],["辽宁省",LIAONING],["内蒙古自治区",NEIMENG],["青海省",QINGHAI],["山西省",SHANXI],["陕西省",SHANXI1],["山东省",SHANDONG],["四川省",SICHUAN],["西藏自治区",XIZANG],["云南省",YUNNAN],["浙江省",ZHEJIANG],["重庆市",CHONGQING],["新疆维吾尔自治区",XINJIANG]]);
-        
         var overlay_exist=1;
         nowindex = 0;
         nowlevel = 1;//1->全国  2->省份 3->市级
         timeoutID= null;//消除双击=2*单击
         dblclick_flag=0;
-        function onLoad() {
-            map = new T.Map('mapDiv',{minZoom:4,maxZoom:10}); 
-            map.centerAndZoom(new T.LngLat(86.40769, 36.89945), zoom);
-            geocode = new T.Geocoder();
-            map.disableDoubleClickZoom();
-            getMapBounds();
-            //var imageURL = "./css/2.png";
-            var imageURL = "./css/bg.jpg";
-            //创建自定义图层对象
-            lay = new T.TileLayer(imageURL, {minZoom: 4, maxZoom: 4,opacity:1,bounds:map.getBounds(),width:'1000px'});
-            //console.log()
-            console.log(lay);
-            map.addLayer(lay);
-            
-            changeClass(2);
-
-            map.addEventListener("zoomstart",function(e){
-                
-                
-            });
-            map.addEventListener("zoomend",function(e){
-                if(this.getZoom()==4){
-                    map.removeLayer(lay);
-                    //console.log("ssss");
-                    //changeClass(4);
-                }
-
-                if(this.getZoom()<=6 && overlay_exist==0){
-                    hide_polygon(false);
-                    show_polygon(1);
-                    overlay_exist=1;
-                    map.removeEventListener("click",MapClick);
-
-                    
-                }
-                if(this.getZoom()==7 && overlay_exist==1){
-                    hide_polygon(true);
-                    overlay_exist=0;
-                    map.addEventListener("click",MapClick);
-                }
-                
-            });
-
-            //startOverLay();
-            for (var i = 0,aLen = areaArr.length; i < aLen; i++) {
-                //console.log(areaArr[i]);
-                polygon(areaArr[i].area.points,areaArr[i].area.name,1);
-            }
-            
-        }
-
-        function changeClass(num){//根据观察html获得以下隐藏的技巧
-            var target = getByClass(document,"tdt-tile-container tdt-zoom-animated");
-            
-            target[2].lastChild.setAttribute("style", "width: 1366px; height: 768px; transform: translate3d(0px, 0px, 0px); opacity: 1;"); 
-            console.log(target[num].lastChild);
-            if(num==2){
-                var target1 = getByClass(document,"tdt-control-copyright tdt-control");
-                //console.log(target1);
-                target1[0].setAttribute("style", "display:none");
-            }
-            
-        }
-        function getByClass(oParent, sClass){
-            var aResult=[];
-            var aEle=oParent.getElementsByTagName('*');
-            
-            for(var i=0;i<aEle.length;i++){
-                if(aEle[i].className==sClass)
-                {
-                    aResult.push(aEle[i]);
-                }
-            }
-            //console.log(aResult[2].lastChild);
-            
-            return aResult;
-        }
-        function getMapBounds() {
-            var bs = map.getBounds();       //获取可视区域
-            var bssw = bs.getSouthWest();   //可视区域左下角
-            var bsne = bs.getNorthEast();   //可视区域右上角
-            //alert("当前地图可视范围是：" + bssw.getLng() + "," + bssw.getLat() + "到" + bsne.getLng() + "," + bsne.getLat());
-            console.log(bs);
-            //alert("当前地图可视范围是：" + bs);
-        }
-
-        function MapClick(e){
-            if(timeoutID) {//取消上次延时未执行的方法
-                timeoutID = clearTimeout(timeoutID);
-            }
-            timeoutID= window.setTimeout(function(){//消除双击=2*单击
-                hide_polygon(false);
-                map.centerAndZoom(new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat()), 7);
-                overlay_exist=0;
-
-                geocode.getLocation(e.lnglat,searchResult1);
-            }, 300);
-            
-        }
-        
-         
-        function searchResult1(result)
-        {
-            //console.log(result);
-            var address = result.getAddress();
-            var name = address.substr(0,2);
-            //console.log(name);
-            for(var key of province){
-                //console.log(key[0].substr(0,2)+"   "+name);
-                if(key[0].substr(0,2) == name)
-                {
-                    addchild(key[0]);
-                }
-                
-            }
-        }
-
-        function polygon(points,name,level){
-            var pointsArr = [];
-            var color = "white";
-            var num=0;
-            
-            for (var i = 0; i < ytw_data.prlist.length; i++) {
-                if(ytw_data.prlist[i].pr == name){
-                    var gap = (ytw_data.max - ytw_data.min) / 6;
-                    num = ytw_data.prlist[i].num;
-                    color = colors[Math.round((ytw_data.prlist[i].num - ytw_data.min)/gap)];
-                }
-            }
-            if(level>1){
-                //console.log("color");
-                color = colors[parseInt(Math.random()*(7),10)];
-            }
-           
-            
-            for (var i = 0; i < points.length; i++) {
-                var regionLngLats = [];
-                var regionArr = points[i].region.split(",");
-                for (var m = 0; m < regionArr.length; m++) {
-                    var lnglatArr = regionArr[m].split(" ");
-                    var lnglat = new T.LngLat(lnglatArr[0], lnglatArr[1]);
-                    regionLngLats.push(lnglat);
-                    pointsArr.push(lnglat);
-                }
-                //创建面对象
-                
-                var polygon = new T.Polygon(regionLngLats,{color: "white", weight: 1, opacity: 0.5, fillColor: color, fillOpacity: 0.7});
-                
-                polygon.addEventListener("mouseover",function(e){
-                    this.setColor("#0000ff");
-                    this.setWeight(5);
-                    
-                    var content = name + '<br> <hr />' + "信息站数："+num;
-                    openInfo(content,e);
-
-                });
-                polygon.addEventListener("mouseout",function(e){
-                    this.setColor("white");
-                    this.setWeight(1);
-                    
-                });
-                polygon.addEventListener("dblclick",function(e){
-                    if(timeoutID) {//取消上次延时未执行的方法
-                        timeoutID = clearTimeout(timeoutID);
-                    }
-                    
-                    if(map.getZoom()<7 &&!dblclick_flag){
-                        dblclick_flag=1;
-                        hide_polygon(true);
-                        map.centerAndZoom(new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat()), 7);
-                        map.addEventListener("click",MapClick);
-                        addchild(name);
-                        //geocode.getLocation(e.lnglat,searchResult1);
-                        //
-                    }
-                    
-                });
-                polygon.addEventListener("click",function(e){
-
-                    if(map.getZoom()==7 ){
-                        //console.log("11111111");
-                        //hide_polygon();
-                        map.centerAndZoom(new T.LngLat(e.lnglat.getLng(), e.lnglat.getLat()), 7);
-                        overlay_exist=0;
-                    }
-                    
-                });
-                
-                if(level==1){
-                    arr.push(polygon);
-                }else if(level==2){
-                    //console.log(name);
-                    arr1.push(polygon);
-                }
-                map.addOverLay(polygon);
-                //console.log(name);
-            }
-            
-        }
-        function addchild(name){
-            var temp = province.get(name);
-            console.log(name);
-            //console.log(temp);
-            for (var i = 0,aLen = temp.length; i < aLen; i++) {
-                polygon(temp[i].area.points,temp[i].area.name,2);
-            }
-        }
-
-        function hide_polygon(flag){
-            var arr_overlay = Array();
-            if(flag){
-               // console.log(flag);
-                arr_overlay = arr;
-            }else{
-                arr_overlay = map.getOverlays();
-            }
-            //console.log(arr_overlay.length);
-            
-            for(var i =0,lens = arr_overlay.length;i<lens;i++){//把所有的覆盖物隐藏，这样可以加速
-                var polygon = arr_overlay.pop();
-                try{
-                    polygon.hide();      
-                }catch(e){
-                    polygon.closeInfoWindow();
-                }
-                
-            }
-            
-        }
-
-
-        function show_polygon(level,name){
-            if(level==1){
-                for (var i = 0,aLen = areaArr.length; i < aLen; i++) {
-                    //console.log(areaArr[i]);
-                    polygon(areaArr[i].area.points,areaArr[i].area.name,1);
-                    dblclick_flag=0;
-                }
-            }else if(level==2){
-                //根据name的省市
-                console.log(name);
-            }
-            
-            
-        }
-
-        function openInfo(content,e){
-            var point = e.lnglat;
-            marker = new T.Marker(point);// 创建标注
-            var markerInfoWin = new T.InfoWindow(content,{offset:new T.Point(0,-30)}); // 创建信息窗口对象
-            map.openInfoWindow(markerInfoWin,point); //开启信息窗口
-            //console.log(marker);
-        }
     </script>
 </head>
-<body onLoad="onLoad()">
-<div id="table" > 
-    
-    <legend id="table" class="legend" >
-        
-    </legend>
-</div>
-<div class="list">
-    <div class="list-topbar clearfix">
-        <a class="province station" data-direction="1">全国各省站点数</a> 
-    </div>
-    <div id="dataList" class="table-wrap">  
-        <table class="list-table">
-            <thead>
-                <tr>
-                    <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
-                    <th class="province">省份<span class="sep"></span></th>
-                    <th class="station-num">站点数<span class="sep"></span></th>
-                    <th class="proportion">占比(%)</th>
-                </thead>
-                <tbody>
-                    <tr class="tr0">
-                        <td class="index"><span>1</span></td>
-                        <td class="province">安徽省</td>
-                        <td class="station-num">22</td>
-                        <td class="proportion">
-                            <span class="txt" style="bottom: 14.2px;">25%</span>
-                            <span class="box" style="height: 25%;"></span>
-                        </td>
-                    </tr>
-                    <tr class="tr1">
-                        <td class="index"><span>2</span></td>
-                        <td class="province">河南省</td>
-                        <td class="station-num">27</td>
-                        <td class="proportion">
-                            <span class="txt" style="bottom: 14.2px;">30%</span>
-                            <span class="box" style="height: 30%;"></span>
-                        </td>
-                    </tr>
-                    <tr class="tr2">
-                        <td class="index"><span>3</span></td>
-                        <td class="province">河北省</td>
-                        <td class="station-num">10</td>
-                        <td class="proportion">
-                            <span class="txt" style="bottom: 14.2px;">12%</span>
-                            <span class="box" style="height: 12%;"></span>
-                        </td>
-                    </tr>
-                    <tr class="tr3">
-                        <td class="index"><span>4</span></td>
-                        <td class="province">山东省</td>
-                        <td class="station-num">8</td>
-                        <td class="proportion">
-                            <span class="txt" style="bottom: 14.2px;">5%</span>
-                            <span class="box" style="height: 5%;"></span>
-                        </td>
-                    </tr>
-                </tbody>
-        </table>  
-    </div>
-</div>
-<div id="mapDiv" style="position:absolute;width:100%; height:100%"></div>
 
+<body onLoad="onLoad()" style="scrollbar-arrow-color:yellow;scrollbar-base-color:lightsalmon">
+    <div id="table" > 
+        <legend id="table" class="legend" > </legend>
+    </div>
+    <div class="list">
+        <div class="list-topbar clearfix">
+            <a class="province station" data-direction="1">全国各省站点数</a> 
+        </div>
+        <div id="dataList" class="table-wrap">  
+            <table class="list-table">
+                <thead>
+                    <tr>
+                        <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                        <th class="province">省份<span class="sep"></span></th>
+                        <th class="station-num">站点数<span class="sep"></span></th>
+                        <th class="proportion">占比(%)</th>
+                    </thead>
+                    <tbody id="tbody1">
+                        
+                    </tbody>
+            </table>  
+        </div>
+    </div>
+    <div id="mapDiv" style="position:absolute;width:100%; height:100%">
+    </div>
 </body>
+
 </html>

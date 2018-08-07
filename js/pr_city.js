@@ -26,3 +26,5 @@ var HENAN = [Luohe,Xuchang,Puyang,Jiyuan,Zhumadian,Hebi,Anyang,Zhoukou,Jiaozuo,X
  var SHANDONG = [Yantai,Weifang,Heze,Jining,Taian,Dezhou,Qingdao,Linyi,Zibo,Binzhou,Zaozhuang,Liaocheng,Dongying,Weihai,Laiwu,Rizhao,Jinan]
  var YUNNAN = [Puer,Lincang,Dali,Zhaotong,Xishuangbanna,Lijiang,Yuxi,Baoshan,Wenshan,Honghe,Qujing,Deqen,Chuxiong,Kunming,Nujiang,Dehong]
  var ZHEJIANG = [Ningbo,Wenzhou,Jiaxing,Huzhou,Taizhou,Lishui,Hangzhou,Shaoxing,Jinhua,Quzhou,Zhoushan];
+ //var SHANGHAI = [Qingpu,Hongkou,Yangpu,Huangpu,Minhang,Jiading,Xuhui,Pudong,Changning,Jinshan,Jingan,Songjiang,Chongming,Fengxian];
+ var TAIWAN = [Ilan,Penghu,Hsinchu,Tainan,Hualien,Keelung,Taitung,Changhua,XingBei,Yunlin,Pingtung,Kaohsiung,Chiai,Miaoli,Nantou,Taipei,Taoyuan,Taichung,Hsinchu];

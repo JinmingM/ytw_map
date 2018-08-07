@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<meta name="keywords" content="天地图"/>
+<title>地理位置获取城市</title>
+    <script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0"></script>
+    <script type="text/javascript" src="js/data1.js"></script>
+    <style type="text/css">body,html{width:100%;height:100%;margin:0;font-family:"Microsoft YaHei"}#mapDiv{width:100%;height:400px}input,b,p{margin-left:5px;font-size:14px}</style>
+    <script>
+    var map;
+    var zoom = 4;
+    function onLoad()
+    {
+        map = new  T.Map('mapDiv');
+        map.centerAndZoom(new T.LngLat(80.40769, 36.89945), zoom);
+        mapbounds = map.getBounds();
+        
+        city_stnum = 0;
+        var arr = ["亳州市","亳州市","安庆市","黄山市","亳州市","亳州市","亳州市","亳州市","池州市","六安市","滁州市","六安市","安庆市","安庆市","阜阳市","义安区市","宿州市","铜官区市","芜湖市","宣城市","宣城市","三明市","三明市","定西市","宁德市","宁德市","宣城市","定西市","酒泉市","临夏回族自治州和政县市","陇南市","定西市","定西市","天水市","定西市","武威市","张掖市","陇南市","张掖市","张掖市","张掖市","酒泉市","庆阳市","张掖市","肇庆市","阳江市","肇庆市","肇庆市","茂名市","钦州市","湛江市","防城港市","梧州市","揭阳市","玉林市","桂林市","南宁市","铜仁市","黔东南苗族侗族自治州黄平县市","河池市","黔西南布依族苗族自治州兴仁县市","遵义市","黔东南苗族侗族自治州施秉县市","玉林市","琼中黎族苗族自治县市","琼中黎族苗族自治县市","保定市","保定市","邯郸市","石家庄市","邢台市","邢台市","邢台市","焦作市","保定市","洛阳市","洛阳市","南阳市","南阳市","新乡市","洛阳市","洛阳市","洛阳市","南阳市","洛阳市","焦作市","驻马店市","焦作市","焦作市","焦作市","南阳市","信阳市","焦作市","平顶山市","信阳市","焦作市","牡丹江市","驻马店市","哈尔滨市","大庆市","黑河市","牡丹江市","郑州市","新乡市","恩施土家族苗族自治州鹤峰县市","佳木斯市","黄冈市","恩施土家族苗族自治州利川市","恩施土家族苗族自治州利川市","双鸭山市","黄冈市","十堰市","荆门市","黄冈市","黄冈市","黄冈市","十堰市","十堰市","武汉市","襄阳市","襄阳市","十堰市","宜昌市","荆门市","襄阳市","襄阳市","宜昌市","邵阳市","怀化市","湘西土家族苗族自治州龙山县市","邵阳市","延边朝鲜族自治州安图县市","岳阳市","白山市","白山市","邵阳市","益阳市","通化市","通化市","镇江市","徐州市","盐城市","赣州市","宿迁市","吉安市","吉安市","新余市","宜春市","抚顺市","巴彦淖尔市","赤峰市","九江市","铁岭市","赤峰市","呼伦贝尔市","通辽市","抚顺市","中卫市","西宁市","菏泽市","日照市","聊城市","济南市","中卫市","菏泽市","济南市","菏泽市","菏泽市","景德镇市","临沂市","济宁市","临沂市","泰安市","临沂市","临沂市","景德镇市","济南市","枣庄市","枣庄市","淄博市","泰安市","晋城市","临汾市","运城市","临汾市","运城市","临汾市","运城市","运城市","长治市","长治市","汉中市","安康市","运城市","运城市","西安市","渭南市","西安市","汉中市","西安市","西安市","凉山彝族自治州甘洛县市","商洛市","广安市","凉山彝族自治州会理县市","广元市","成都市","凉山彝族自治州西昌市","眉山市","绵阳市","绵阳市","绵阳市","绵阳市","德阳市","雅安市","成都市","眉山市","德阳市","雅安市","宜宾市","德阳市","昌吉回族自治州奇台县市","遂宁市","塔城地区裕民县市","拉萨市","阿勒泰地区福海县市","伊犁哈萨克自治州伊宁市","德宏傣族景颇族自治州盈江县市","保山市","曲靖市","大理白族自治州云龙县市","伊犁哈萨克自治州霍城县市","昆明市","临沧市","临沧市","曲靖市","大理白族自治州大理市","曲靖市","丽江市","嘉兴市","杭州市","金华市","文山壮族苗族自治州文山市","丽水市","台州市","金华市","丰都县区","九龙坡区","奉节县区","湖州市","石柱土家族自治县区","洛阳市","渝北区","商洛市","亳州市","徐州市","临沂市","秀山土家族苗族自治县区","黄冈市","绵阳市","安阳市","盐城市","毕节市","赣州市","萍乡市"];
+        var map = new Map()
+        for(var i=0,lens = arr.length;i<lens;i++){
+            var flag = 0;
+            for(var x of map){
+                if(x[0]==arr[i]){
+                    flag = 1;
+                }
+            }
+            if(flag==0){
+                map.set(arr[i],1);
+            }else{
+                map.set(arr[i],map.get(arr[i])+1);
+            }
+
+        }
+        //console.log(map);
+        var str_temp = "";
+        for(var x of map){
+            str_temp+="{\"city\":\""+x[0]+"\",\"num\":"+x[1]+"},";
+        }
+        //console.log(str_temp);
+        console.log(ytw_data.citylist);
+        //addMapClick();
+        city_str = "[";
+        geocode = new T.Geocoder();
+
+    }
+    
+    function getCityStnum(name){
+        var data = ytw_data.points;
+        //console.log(data.length);
+        for(var i=0,lens = data.length;i<lens;i++){
+            var temp = new T.LngLat(data[i].lng,data[i].lat);
+            //console.log(data[i].lng);
+            geocode.getLocation(temp,searchResult);
+            
+        }
+
+    }
+    
+    function searchResult(result)
+    {
+        
+        var addr = result.getAddressComponent();
+        //console.log(addr);
+        try{
+            var str = addr.city.split('市')[0];
+            var cityname = "";
+            if(str.indexOf("省") != -1){
+                cityname = str.split('省')[1]+"市";
+            }else if(str.indexOf("自治区") != -1){
+                cityname = str.split('自治区')[1]+"市"; 
+            }else if(str=="重庆"){
+                str = addr.city.split('市')[1];
+                cityname = str.split('区')[0]+"区"; 
+            }
+            if(cityname!=""){
+                //console.log(cityname);
+                city_str+="\"" + cityname + "\",";
+                city_stnum++;
+                //console.log(city_stnum);
+                if(city_stnum==265){
+                    city_str += "]";
+                    console.log(city_str);
+                }
+            }
+        }catch(e){
+
+        }
+        
+        
+        //console.log(cityname);
+
+    }
+    function addMapClick()
+    {
+        removeMapClick();
+        map.addEventListener("click",MapClick);
+    }
+
+    function removeMapClick()
+    {
+        map.removeEventListener("click",MapClick);
+    }
+    
+    function MapClick(e)
+    {
+        alert(e.lnglat.getLng()+","+e.lnglat.getLat());
+    }
+    
+</script>
+</head>
+<body onLoad="onLoad()">
+    <div id="mapDiv" style="height:100%;width:100%"></div>
+    
+</body>
+</html>

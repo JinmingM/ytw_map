@@ -6,15 +6,15 @@
 <title>天地图－地图API－范例－行政区划</title>
 <style type="text/css">body,html{width:100%;height:100%;margin:0;font-family:"Microsoft YaHei"}#mapDiv{width:100%;height:100%}input,b,p{margin-left:5px;font-size:14px}</style>
 <script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0"></script>
-<script type="text/javascript" src="area.js"></script>
-<script type="text/javascript" src="data1.js"></script>
+<script type="text/javascript" src="js/area.js"></script>
+<script type="text/javascript" src="js/data1.js"></script>
 <script> 
     var map; 
     var zoom = 4; 
     var administrative;
     var arr = new Array();
     var colors=["#FFFF24","#FFE210","#FFC100","#FF9F00","#FF7D08","#FF6900","#FF5702"];
-    var areaArr = [BeiJingArea,GuangdongArea,GuangxiArea,HebeiArea,GuizhouArea,FujianArea,GansuArea,AnhuiArea,JilinArea,HenanArea,HainanArea,HelongjiangArea,HubeiArea,HunanArea,JiangxiArea,NingxiaArea,QinghaiArea,ShangdongArea,JiangsuArea,LiaoningArea,SichuanArea,XizangArea,NeimengArea,ZhejiangArea,ShanxiArea,ShanxiArea1,XinjiangArea,YunnanArea,ChongqingArea];
+    var areaArr = [BeiJingArea,GuangdongArea,GuangxiArea,HebeiArea,GuizhouArea,FujianArea,GansuArea,AnhuiArea,JilinArea,HenanArea,HainanArea,HelongjiangArea,HubeiArea,HunanArea,JiangxiArea,NingxiaArea,QinghaiArea,ShangdongArea,JiangsuArea,LiaoningArea,SichuanArea,XizangArea,NeimengArea,ZhejiangArea,ShanxiArea,ShanxiArea1,XinjiangArea,YunnanArea,ChongqingArea];//,ShanghaiArea,TaiwanArea
 
     
     //console.log(BeiJingArea);
@@ -26,14 +26,11 @@
         map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
         //console.log(HainanArea.area);
         //polygon(HainanArea.area.points);
-        for (var i = 0,aLen = ANHUI.length; i < aLen; i++) {
-            //console.log(ANHUI1[i]);
-            //polygon(ANHUI[i].area.points);
-        };
+        
         //startOverLay();
         str = ytw_data.prlist[0].pr;
         //addLayer(str,true);
-        addLayer("新疆维吾尔自治区",true);
+        addLayer("台湾省",true);
     }
 
     function startOverLay(){
@@ -57,32 +54,43 @@
             searchWord: name
             //searchWord: ytw_data.prlist[0].pr
         };
-        administrative.search(config, searchResult1);
+        administrative.search(config, searchResult);
 
 
     }
 
     function searchResult2(result)
     {
-        console.log(result);
-        if(result.getStatus() == 100) {
+        if(result.getStatus() == 100) 
+        {
             var data = result.getData();
-            showMsg(data); 
-            //document.getElementById("administrativeMsg").innerHTML = html; 
+            showMsg(data);
+            
         }
-        else {
+        else 
+        {
             result.getMsg();
         }
+        var str = "[";
+        for(var i=0,lens=result.data[0].child.length;i<lens;i++){
+            //console.log(i);
+            str+=result.data[0].child[i].englishabbrevation+",";
+            if(i==lens-1){
+                str+="]";
+            }
+        }
+        console.log(str);
+        
     }
 
     function searchResult(result)//省
     {
         var str = "";
         var last=JSON.stringify(result);
-        console.log(last);
-        console.log(result.data[0].points.length);
+        //console.log(last);
+        //console.log(result.data[0].points.length);
         str = "var "+result.data[0].englishabbrevation+"Area = {\"area\":{\"level\":\""+result.data[0].level+"\",\"lonlat\":\""+result.data[0].lnt+","+result.data[0].lat+"\",\"name\":\""+result.data[0].name+"\",\"points\":[{\"region\":\"";
-        for(var i=4,lens=result.data[0].points.length;i<lens;i++){
+        for(var i=0,lens=result.data[0].points.length;i<lens;i++){
             //console.log(i);
             str+=result.data[0].points[i].region;
             if(i<lens-1){
@@ -155,7 +163,7 @@
     }
     
     function showMsg(data){
-        //console.log(data);
+        console.log(data);
         for(var i = 0; i < data.length; i++){
             
             
@@ -174,7 +182,7 @@
             if(data[i].points){
                 //绘制行政区划
                 //console.log(data[i].points);
-                //polygon(data[i].points);
+                polygon(data[i].points);
             }
             
             //解释下级行政区划
@@ -191,7 +199,7 @@
     
     function polygon(points){
         var pointsArr = [];
-        //console.log(points);
+        console.log(points);
         for (var i = 0; i < points.length; i++) {
             var regionLngLats = [];
             var regionArr = points[i].region.split(",");

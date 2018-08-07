@@ -36,17 +36,22 @@
     <script type="text/javascript" src="city/yunnan.js"></script>
     <script type="text/javascript" src="city/zhejiang.js"></script>
     <script type="text/javascript" src="city/xinjiang.js"></script>
+    <script type="text/javascript" src="city/taiwan.js"></script>
     <script type="text/javascript" src="js/pr_city.js"></script>
     <script type="text/javascript" src="js/func.js"></script>
+    <script type="text/javascript" src="js/echarts.min.js"></script>
     <script>
         var map;
         var zoom = 4;
         var colors=["#FFFF24","#FFE210","#FFC100","#FF9F00","#FF7D08","#FF6900","#FF5702"];
-        var areaArr = [BeiJingArea,GuangdongArea,GuangxiArea,HebeiArea,GuizhouArea,FujianArea,GansuArea,AnhuiArea,JilinArea,HenanArea,HainanArea,HelongjiangArea,HubeiArea,HunanArea,JiangxiArea,NingxiaArea,QinghaiArea,ShangdongArea,JiangsuArea,LiaoningArea,SichuanArea,XizangArea,NeimengArea,ZhejiangArea,ShanxiArea,ShanxiArea1,XinjiangArea,YunnanArea,ChongqingArea];
+        var areaArr = [BeiJingArea,GuangdongArea,GuangxiArea,HebeiArea,GuizhouArea,FujianArea,GansuArea,AnhuiArea,JilinArea,HenanArea,HainanArea,HelongjiangArea,HubeiArea,HunanArea,JiangxiArea,NingxiaArea,QinghaiArea,ShangdongArea,JiangsuArea,LiaoningArea,SichuanArea,XizangArea,NeimengArea,ZhejiangArea,ShanxiArea,ShanxiArea1,XinjiangArea,YunnanArea,ChongqingArea,TaiwanArea];
         var arr = new Array();//利用数组保存p  用于隐藏显示
         var arr1 = new Array();
-        var province = new Map([["安徽省",ANHUI],["福建省",FUJIAN],["甘肃省",GANSU],["广东省",GUANGDONG],["广西壮族自治区",GUANGXI],["贵州省",GUIZHOU],["海南省",HAINAN],["河北省",HEBEI],["河南省",HENAN],["黑龙江省",HEILONGJIANG],["吉林省",JILIN],["江苏省",JIANGSU],["湖北省",HUBEI],["湖南省",HUNAN],["宁夏回族自治区",NINGXIA],["江西省",JIANGXI],["辽宁省",LIAONING],["内蒙古自治区",NEIMENG],["青海省",QINGHAI],["山西省",SHANXI],["陕西省",SHANXI1],["山东省",SHANDONG],["四川省",SICHUAN],["西藏自治区",XIZANG],["云南省",YUNNAN],["浙江省",ZHEJIANG],["重庆市",CHONGQING],["新疆维吾尔自治区",XINJIANG]]);
+        var province = new Map([["安徽省",ANHUI],["福建省",FUJIAN],["甘肃省",GANSU],["广东省",GUANGDONG],["广西壮族自治区",GUANGXI],["贵州省",GUIZHOU],["海南省",HAINAN],["河北省",HEBEI],["河南省",HENAN],["黑龙江省",HEILONGJIANG],["吉林省",JILIN],["江苏省",JIANGSU],["湖北省",HUBEI],["湖南省",HUNAN],["宁夏回族自治区",NINGXIA],["江西省",JIANGXI],["辽宁省",LIAONING],["内蒙古自治区",NEIMENG],["青海省",QINGHAI],["山西省",SHANXI],["陕西省",SHANXI1],["山东省",SHANDONG],["四川省",SICHUAN],["西藏自治区",XIZANG],["云南省",YUNNAN],["浙江省",ZHEJIANG],["重庆市",CHONGQING],["新疆维吾尔自治区",XINJIANG],["台湾省",TAIWAN]]);
         var overlay_exist=1;
+        start_LngLat = new T.LngLat(140.40769, 36.89945);
+        now_LngLat = new T.LngLat(140.40769, 36.89945);
+        //now_LngLat = new T.LngLat(80.40769, 36.89945); 
         nowindex = 0;
         nowlevel = 1;//1->全国  2->省份 3->市级
         timeoutID= null;//消除双击=2*单击
@@ -54,11 +59,13 @@
     </script>
 </head>
 
-<body onLoad="onLoad()" style="scrollbar-arrow-color:yellow;scrollbar-base-color:lightsalmon">
+<body onLoad="onLoad()">
+
     <div id="table" > 
         <legend id="table" class="legend" > </legend>
     </div>
-    <div class="list">
+
+    <div class="list" id="list">
         <div class="list-topbar clearfix">
             <a class="province station" data-direction="1">全国各省站点数</a> 
         </div>
@@ -76,9 +83,46 @@
                     </tbody>
             </table>  
         </div>
+        
+        <!--
+        <div class="table-converter">  
+            <span id="column_graphic" class="">
+                <a href="javascript:void(0)" id="type1" onClick="Converter(this)">
+                    <img src="css/column.png" style="left:0px">
+                </a>
+            </span>
+            <span id="line_graphic" class="">
+                <a href="javascript:void(0)" id="type2" onClick="Converter(this)">
+                    <img src="css/line.png" style="left:0px">
+                </a>
+            </span>
+            <span id="pie_graphic" class="">
+                <a href="javascript:void(0)" id="type3" onClick="Converter(this)">
+                    <img src="css/pie.png" style="left:0px">
+                </a>
+            </span>
+        </div>
+        -->
     </div>
+    <div class="list" id="list-chart">
+        <div id="dataChart" class="table-chart">  
+            <div id="chart" style="width: 100%;height:100%;"></div>
+        </div>
+    </div>
+    <div class="list" id="list-chart1">
+        <div id="dataChart1" class="table-chart">  
+            <div id="chart1" style="width: 100%;height:100%;"></div>
+        </div>
+    </div>
+    <div class="list" id="list-chart2">
+        <div id="dataChart2" class="table-chart">  
+            <div id="chart2" style="width: 100%;height:100%;"></div>
+        </div>
+    </div>
+
     <div id="mapDiv" style="position:absolute;width:100%; height:100%">
     </div>
+
 </body>
 
 </html>
